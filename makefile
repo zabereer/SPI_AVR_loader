@@ -1,9 +1,9 @@
 BOARD_TAG = uno
-AVRDUDE = /usr/bin/avrdude
-AVRDUDE_CONF = /etc/avrdude.conf
+ARDMK_VENDOR = arduino
 ARDUINO_LIBS = SPI
 
-ARDUINO_DIR = ../arduino-ide
+# path where arduino IDE is (from https://www.arduino.cc/en/software)
+ARDUINO_DIR = ../arduino
 include ../Arduino-Makefile/Arduino.mk
 
 CXXFLAGS += --std=c++11

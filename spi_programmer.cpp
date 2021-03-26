@@ -20,7 +20,7 @@ bool spi_programmer::device_pgm_t::verify_signature(bool verbose) const
 	{
 		Serial.print(F("Device signature "));
 		Serial.print(sig, HEX);
-		Serial.print(F(" matched"));
+		Serial.println(F(" matched"));
 	}
 	return true;
 }

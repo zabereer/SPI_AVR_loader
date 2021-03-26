@@ -15,17 +15,19 @@ namespace spipgm = spi_programmer;
 
   Connections when using Arduino UNO as ISP for Adafruit Trinket
   +===============+===============+===============+
-  |    Trinket	  |  Arduino Uno  |	SPI	  |
+  |    Trinket    |  Arduino Uno  |     SPI       |
   +===============+===============+===============+
-  |	VBAT	  |   3V / 5V	  |	Vcc	  |
+  |     VBAT      |   3V / 5V     |     Vcc       |
   +---------------+---------------+---------------+
-  |	RST	  |	 #10	  |	 SS	  |
+  |     GND       |      GND      |     GND       |
   +---------------+---------------+---------------+
-  |	 #0	  |	 #11	  |	MOSI	  |
+  |     RST       |      #10      |      SS       |
   +---------------+---------------+---------------+
-  |	 #1	  |	 #12	  |	MISO	  |
+  |      #0       |      #11      |     MOSI      |
   +---------------+---------------+---------------+
-  |	 #2	  |	 #13	  |	SCK	  |
+  |      #1       |      #12      |     MISO      |
+  +---------------+---------------+---------------+
+  |      #2       |      #13      |     SCK       |
   +---------------+---------------+---------------+
  */
 
@@ -67,7 +69,7 @@ uint32_t enable_programming(bool verbose = false)
 	if (verbose)
 	{
 		Serial.print(F("Programming enabled at clock rate "));
-		Serial.print(clock_rate);
+		Serial.println(clock_rate);
 	}
 
 	return clock_rate;
@@ -89,7 +91,7 @@ void display_device_signature()
 	enable_programming(verbose);
 	uint32_t sig = spipgm::read_signature(verbose);
 	Serial.print(F("Device signature "));
-	Serial.print(sig, HEX);
+	Serial.println(sig, HEX);
 	spipgm::program_disable();
 	spipgm::powerdown_avr();
 }

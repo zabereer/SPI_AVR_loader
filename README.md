@@ -31,6 +31,7 @@ This file can be loaded onto a target device via the serial output menus from th
   |      #2       |      #13      |     SCK       |
   +---------------|---------------|---------------+
 ```
+Also see the AVR [ATtiny85 datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf) section 20.5 for more details.
 
 ## Example use
 After uno is wired to Trinket and plugged in.

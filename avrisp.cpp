@@ -478,7 +478,7 @@ void load_image()
 				       page_size,
 				       &decoded_full_buffer);
 		char i8hex_buffer[100];
-		Serial.println(F("Paste image below"));
+		Serial.println(F("Paste image below or upload hex file"));
 		bool done = false;
 		do
 		{

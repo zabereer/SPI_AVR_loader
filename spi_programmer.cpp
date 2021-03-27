@@ -35,14 +35,6 @@ bool spi_programmer::device_pgm_t::write_default_fuses(bool verbose) const
 	return write_verify_fuses(default_fuses, verbose);
 }
 
-bool spi_programmer::image_pgm_t::write_to_device(bool verbose) const
-{
-
-	return true;
-}
-
-
-
 void spi_programmer::powerup_avr()
 {
 	delay(100);

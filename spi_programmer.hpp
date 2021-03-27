@@ -108,8 +108,6 @@ namespace spi_programmer
 			return *reinterpret_cast<const device_pgm_t*>(
 				pgm_read_ptr(&device));
 		}
-
-		bool write_to_device(bool verbose = false) const;
 	};
 
 	void powerup_avr();

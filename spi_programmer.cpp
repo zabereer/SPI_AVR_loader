@@ -1,39 +1,9 @@
 #include"spi_programmer.hpp"
+
+#include<Arduino.h>
+#include<HardwareSerial.h>
+
 #include"util.hpp"
-
-#include"Arduino.h"
-#include"HardwareSerial.h"
-
-bool spi_programmer::device_pgm_t::verify_signature(bool verbose) const
-{
-	const uint32_t sig = read_signature(verbose);
-	const uint32_t expected = get_expected_signature();
-	if (sig != expected)
-	{
-		Serial.print(F("Device signature read "));
-		Serial.print(sig, HEX);
-		Serial.print(F(" does not match expected "));
-		Serial.println(expected, HEX);
-		return false;
-	}
-	else if (verbose)
-	{
-		Serial.print(F("Device signature "));
-		Serial.print(sig, HEX);
-		Serial.println(F(" matched"));
-	}
-	return true;
-}
-
-bool spi_programmer::device_pgm_t::write_programming_fuses(bool verbose) const
-{
-	return write_verify_fuses(programming_fuses, verbose);
-}
-
-bool spi_programmer::device_pgm_t::write_default_fuses(bool verbose) const
-{
-	return write_verify_fuses(default_fuses, verbose);
-}
 
 void spi_programmer::powerup_avr()
 {
@@ -90,47 +60,6 @@ bool spi_programmer::program_enable(SPISettings spi_settings,
 void spi_programmer::program_disable()
 {
 	SPI.end();
-}
-
-bool spi_programmer::write_image_pgm(const spi_programmer::image_pgm_t& image,
-				     bool verbose)
-{
-	const device_pgm_t* device =
-		reinterpret_cast<const device_pgm_t*>(
-			pgm_read_ptr(&image.device));
-	if (!write_verify_fuses(device->programming_fuses, verbose))
-	{
-		Serial.println(F("Failed to set programming fuses"));
-		return false;
-	}
-
-	return true;
-}
-
-bool spi_programmer::verify_signature(
-	const spi_programmer::image_pgm_t& image,
-	bool verbose)
-{
-	const device_pgm_t* device =
-		reinterpret_cast<const device_pgm_t*>(
-			pgm_read_ptr(&image.device));
-	const uint32_t exp_sig = pgm_read_dword(&device->expected_signature);
-	const uint32_t sig = read_signature(verbose);
-	if (sig != exp_sig)
-	{
-		Serial.print(F("Device signature read "));
-		Serial.print(sig, HEX);
-		Serial.print(F(" does not match expected "));
-		Serial.println(exp_sig, HEX);
-		return false;
-	}
-	else if (verbose)
-	{
-		Serial.print(F("Device signature "));
-		Serial.print(sig, HEX);
-		Serial.print(F(" matched"));
-	}
-	return true;
 }
 
 uint32_t spi_programmer::read_signature(bool verbose)

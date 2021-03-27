@@ -1,4 +1,5 @@
 #include"util.hpp"
+
 #include<ctype.h>
 
 namespace

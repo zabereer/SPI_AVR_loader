@@ -1,5 +1,3 @@
-#include"I8HEX_decoder.hpp"
-
 #include<array>
 #include<cassert>
 #include<cstddef>
@@ -11,6 +9,7 @@
 #include<string>
 #include<utility>
 
+#include"I8HEX_decoder.hpp"
 
 template <std::size_t page_size>
 class TestBase
@@ -21,16 +20,16 @@ protected:
 	typedef std::pair<std::uint16_t, raw_buffer> addr_raw_buffer;
 
 	TestBase()
-		{
-			assert(current_test_base == nullptr);
-			current_test_base = this;
-		}
+	{
+		assert(current_test_base == nullptr);
+		current_test_base = this;
+	}
 
 	~TestBase()
-		{
-			assert(current_test_base);
-			current_test_base = nullptr;
-		}
+	{
+		assert(current_test_base);
+		current_test_base = nullptr;
+	}
 
 public:
 

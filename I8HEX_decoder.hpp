@@ -1,5 +1,5 @@
-#ifndef I8HEX_decoder_HPP_
-#define I8HEX_decoder_HPP_
+#ifndef I8HEX_decoder_HPP
+#define I8HEX_decoder_HPP
 
 #include<stdint.h>
 #include<stddef.h>

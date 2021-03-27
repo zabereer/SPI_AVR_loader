@@ -1,11 +1,11 @@
+#include<Arduino.h>
+#include<avr/pgmspace.h>
+#include<HardwareSerial.h>
+
+#include"devices.hpp"
 #include"I8HEX_decoder.hpp"
-#include"images.hpp"
 #include"spi_programmer.hpp"
 #include"util.hpp"
-
-#include"Arduino.h"
-#include"avr/pgmspace.h"
-#include"HardwareSerial.h"
 
 namespace spipgm = spi_programmer;
 
@@ -170,13 +170,13 @@ void read_write_fuses()
 	spipgm::powerdown_avr();
 }
 
-const spipgm::device_pgm_t* get_signature_flash_page_sizes(uint32_t& sig,
-							   uint16_t& flash,
-							   uint16_t& page)
+const devices::device_pgm_t* get_signature_flash_page_sizes(uint32_t& sig,
+							    uint16_t& flash,
+							    uint16_t& page)
 {
 	sig = spipgm::read_signature(verbose);
-	const spipgm::device_pgm_t* dev_ptr =
-		images::device_for_signature(sig);
+	const devices::device_pgm_t* dev_ptr =
+		devices::device_for_signature(sig);
 
 	flash = 0;
 	page = 0;
@@ -241,7 +241,7 @@ void output_backup_image()
 	uint32_t sig;
 	uint16_t flash_size;
 	uint16_t page_size;
-	const spipgm::device_pgm_t* dev_ptr =
+	const devices::device_pgm_t* dev_ptr =
 		get_signature_flash_page_sizes(sig, flash_size, page_size);
 
 	if (flash_size && page_size)

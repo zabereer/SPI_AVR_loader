@@ -1,9 +1,10 @@
-#ifndef UTIL_HPP_
-#define UTIL_HPP_
+#ifndef UTIL_HPP
+#define UTIL_HPP
 
-#include"HardwareSerial.h"
-#include<stdint.h>
 #include<stddef.h>
+#include<stdint.h>
+
+#include<HardwareSerial.h>
 
 namespace util
 {

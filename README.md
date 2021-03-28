@@ -13,10 +13,11 @@ Any Arduino project build with the Arduino-Makefile will have an I8HEX file in i
 This file can be loaded onto a target device via the serial output menus from the Uno using miniterm.py:
 
 ## Wiring
+### ISP
 ```
   Connections when using Arduino UNO as ISP for Adafruit Trinket
   +===============+===============+===============+
-  |    Trinket    |  Arduino Uno  |     SPI       |
+  |    Trinket    |  Arduino Uno  |  SPI (target) |
   +===============+===============+===============+
   |     VBAT      |   3V / 5V     |     Vcc       |
   +---------------|---------------|---------------+
@@ -33,6 +34,33 @@ This file can be loaded onto a target device via the serial output menus from th
 ```
 Also see the AVR [ATtiny85 datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf) section 20.5 for more details.
 
+### High voltage serial programming
+Use this only to reset fuses of a bricked chip.
+```
+  Connections for high voltage programming
+  +===============+===============+===============+
+  |    Trinket    |  Arduino Uno  | HVSP (target) |
+  +===============+===============+===============+
+  |     VBAT      |      #9       |     Vcc       |
+  +---------------|---------------|---------------+
+  |     GND       |      GND      |     GND       |
+  +---------------|---------------|---------------+
+  |     RST       |#8 (transistor)|     12V*      |
+  +---------------|---------------|---------------+
+  |      #0       |      #11      |     SDI       |
+  +---------------|---------------|---------------+
+  |      #1       |      #12      |     SII       |
+  +---------------|---------------|---------------+
+  |      #2       |      #13      |     SDO       |
+  +---------------|---------------|---------------+
+  |      #3       |      #10      |     SCI       |
+  +---------------|---------------|---------------+
+```
+External 12V supply on RESET pin is required, ensure an NPN transistor's base is connected to the Uno pin #8 to control the switching of the 12V to the Trinket's RESET pin.  
+The miniterm menu will prompt whether you used an inverted level shifter or not. If inverted then pin #8 will be HIGH to shut off the 12V supply on Trinket's RESET pin.  
+Remeber resistors on all connections (SDI, SII, SDO, SCI, #8) and on 12V input source (1K), but not on Vcc.
+Also see the AVR [ATtiny85 datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-2586-AVR-8-bit-Microcontroller-ATtiny25-ATtiny45-ATtiny85_Datasheet.pdf) section 20.6 and 20.7 for more details.
+
 ## Example use
 After uno is wired to Trinket and plugged in.
 ```
@@ -44,17 +72,18 @@ $ pyserial-miniterm
 --- Miniterm on /dev/ttyACM0  9600,8,N,1 ---
 --- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H ---
 
-  Experimental SPI programmer
+AVR SPI programmer
 
-  === Main menu ===
-  v - toggle verbose (current N)
-  s - display device signature
-  f - read/write fuses
-  b - read flash (backup) to serial
-  e - chip erase (seems required before load)
-  l - write flash from serial (load target)
+=== Main menu ===
+v - toggle verbose (current N)
+s - display device signature
+f - read/write fuses
+b - read flash (backup) to serial
+e - chip erase (sometimes required before load)
+l - write flash from serial (load target)
+z - zap fuses with high voltage serial programming
 ```
 
 A device's image can be backed up using `b`, and then need to be copied from the output into a file.
 To load a file select `l` and then press Ctrl+T Ctrl+U and enter the filename to load.
-*However* this only seem to work after a chip erase has been performed with `e`.
+Note sometimes this only works after a chip erase has been performed with `e`.

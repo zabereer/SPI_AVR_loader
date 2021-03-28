@@ -60,7 +60,9 @@ uint8_t util::serial_read_hex_byte()
 {
 	Serial.println(F("Enter byte as 2 hex digits: "));
 	char msn = serial_read_char_of(hexdigits);
+	Serial.print(msn);
 	char lsn = serial_read_char_of(hexdigits);
+	Serial.print(lsn);
 	Serial.println();
 	// no need to verify return value of nibble_for_hex_digit()
 	// because serial_read_char_of() will only return valid values

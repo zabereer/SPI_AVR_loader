@@ -2,34 +2,14 @@
 #include<avr/pgmspace.h>
 #include<HardwareSerial.h>
 
-#include"devices.hpp"
 #include"I8HEX_decoder.hpp"
+#include"devices.hpp"
+#include"high_volt_programmer.hpp"
 #include"spi_programmer.hpp"
 #include"util.hpp"
 
+namespace hvspgm = high_volt_programmer;
 namespace spipgm = spi_programmer;
-
-/*
-  Output an ATtinyXX AVR chip flash in I8HEX format to serial.
-  Input from serial an I8HEX image and load into ATtinyXX AVR chip.
-
-  Connections when using Arduino UNO as ISP for Adafruit Trinket
-  +===============+===============+===============+
-  |    Trinket    |  Arduino Uno  |     SPI       |
-  +===============+===============+===============+
-  |     VBAT      |   3V / 5V     |     Vcc       |
-  +---------------+---------------+---------------+
-  |     GND       |      GND      |     GND       |
-  +---------------+---------------+---------------+
-  |     RST       |      #10      |      SS       |
-  +---------------+---------------+---------------+
-  |      #0       |      #11      |     MOSI      |
-  +---------------+---------------+---------------+
-  |      #1       |      #12      |     MISO      |
-  +---------------+---------------+---------------+
-  |      #2       |      #13      |     SCK       |
-  +---------------+---------------+---------------+
- */
 
 namespace
 {
@@ -40,7 +20,7 @@ namespace
 void setup()
 {
 	Serial.begin(9600);
-	Serial.println(F("\nExperimental SPI programmer\n"));
+	Serial.println(F("\nAVR SPI programmer\n"));
 }
 
 // enable SPI programming of target device, return clock rate
@@ -101,7 +81,7 @@ void write_fuses()
 	// device already powered up
 	spipgm::fuses_t fuses = spipgm::read_fuses(verbose);
 	bool done = false;
-	do
+	while (!done)
 	{
 		spipgm::output_fuses(fuses);
 		Serial.println(F("Think carefully, don't brick your AVR"));
@@ -117,15 +97,23 @@ void write_fuses()
 		switch (c)
 		{
 		case 'k' :
+			Serial.print("current lock = 0x");
+			Serial.println(fuses.lock, HEX);
 			fuses.lock = util::serial_read_hex_byte();
 			break;
 		case 'l' :
+			Serial.print("current low = 0x");
+			Serial.println(fuses.low, HEX);
 			fuses.low =util::serial_read_hex_byte();
 			break;
 		case 'h' :
+			Serial.print("current high = 0x");
+			Serial.println(fuses.high, HEX);
 			fuses.high = util::serial_read_hex_byte();
 			break;
 		case 'x' :
+			Serial.print("current ext = 0x");
+			Serial.println(fuses.ext, HEX);
 			fuses.ext =util::serial_read_hex_byte();
 			break;
 		case 'w' :
@@ -134,7 +122,7 @@ void write_fuses()
 			done = true;
 			break;
 		}
-	} while (!done);
+	}
 }
 
 void read_write_fuses()
@@ -143,7 +131,7 @@ void read_write_fuses()
 	enable_programming(verbose);
 
 	bool done = false;
-	do
+	while (!done)
 	{
 		Serial.println(F("=== Fuses ==="));
 		Serial.println(F("r - read fuses"));
@@ -164,7 +152,7 @@ void read_write_fuses()
 			done = true;
 			break;
 		}
-	} while (!done);
+	}
 
 	spipgm::program_disable();
 	spipgm::powerdown_avr();
@@ -480,7 +468,7 @@ void load_image()
 		char i8hex_buffer[100];
 		Serial.println(F("Paste image below or upload hex file"));
 		bool done = false;
-		do
+		while (!done)
 		{
 			i8hex_buffer[0] = util::serial_read_char_of(":;");
 			if (i8hex_buffer[0] == ':')
@@ -495,7 +483,7 @@ void load_image()
 			{
 				done = process_load_directive(sig);
 			}
-		} while (!done);
+		}
 
 		drain_serial();
 	}
@@ -503,6 +491,87 @@ void load_image()
 	perform_load_image = false;
 	spipgm::program_disable();
 	spipgm::powerdown_avr();
+}
+
+void high_voltage_fuses_reset()
+{
+	spipgm::fuses_t fuses{};
+	bool inverted_high_voltage_level_shifter = true;
+	bool done = false;
+	while (!done)
+	{
+		spipgm::output_fuses(fuses);
+		Serial.println(F("High Voltage fuses reset - "
+				 "don't brick it further"));
+		if (inverted_high_voltage_level_shifter)
+		{
+			Serial.println(F("Set to using inverted level "
+					 "shifter on pin 8"));
+			Serial.println(F("i - change to using non-inverted "
+					 "level shifter on pin 8"));
+		}
+		else
+		{
+			Serial.println(F("Set to using non-inverted level "
+					 "shifter on pin 8"));
+			Serial.println(F("i - change to using inverted "
+					 "level shifter on pin 8"));
+		}
+		Serial.println(F("k - modify lock fuse for next write"));
+		Serial.println(F("l - modify low fuse for next write"));
+		Serial.println(F("h - modify high fuse for next write"));
+		Serial.println(F("x - modify ext fuse for next write"));
+		Serial.println(F("r - read fuses "
+				 "(will prompt to connect power source)"));
+		Serial.println(F("w - write fuses "
+				 "(will prompt to connect power source)"));
+		Serial.println(F("q - quite high voltage fuses reset menu"));
+		Serial.println();
+		Serial.println(F("  ! DO NOT connect 12V source yet !"));
+		char c = util::serial_read_char_of("iklhxrwq");
+		Serial.println();
+
+		switch (c)
+		{
+		case 'i' :
+			inverted_high_voltage_level_shifter =
+				!inverted_high_voltage_level_shifter;
+			break;
+		case 'k' :
+			Serial.print("current lock = 0x");
+			Serial.println(fuses.lock, HEX);
+			fuses.lock = util::serial_read_hex_byte();
+			break;
+		case 'l' :
+			Serial.print("current low = 0x");
+			Serial.println(fuses.low, HEX);
+			fuses.low =util::serial_read_hex_byte();
+			break;
+		case 'h' :
+			Serial.print("current high = 0x");
+			Serial.println(fuses.high, HEX);
+			fuses.high = util::serial_read_hex_byte();
+			break;
+		case 'x' :
+			Serial.print("current ext = 0x");
+			Serial.println(fuses.ext, HEX);
+			fuses.ext =util::serial_read_hex_byte();
+			break;
+		case 'r' :
+			hvspgm::read_fuses(
+				inverted_high_voltage_level_shifter, fuses);
+			break;
+		case 'w' :
+		{
+			hvspgm::write_fuses(
+				inverted_high_voltage_level_shifter, fuses);
+			break;
+		}
+		case 'q' :
+			done = true;
+			break;
+		}
+	}
 }
 
 void loop()
@@ -514,10 +583,12 @@ void loop()
 	Serial.println(F("s - display device signature"));
 	Serial.println(F("f - read/write fuses"));
 	Serial.println(F("b - read flash (backup) to serial"));
-	Serial.println(F("e - chip erase (seems required before load)"));
+	Serial.println(F("e - chip erase (sometimes required before load)"));
 	Serial.println(F("l - write flash from serial (load target)"));
+	Serial.println(
+		F("z - zap fuses using high voltage serial programming"));
 
-	char c = util::serial_read_char_of("vsfbel");
+	char c = util::serial_read_char_of("vsfbelz");
 	Serial.println();
 	switch (c)
 	{
@@ -538,6 +609,9 @@ void loop()
 		break;
 	case 'l' :
 		load_image();
+		break;
+	case 'z' :
+		high_voltage_fuses_reset();
 		break;
 	}
 }

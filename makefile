@@ -6,7 +6,7 @@ ARDUINO_LIBS = SPI
 ARDUINO_DIR = ../arduino
 include ../Arduino-Makefile/Arduino.mk
 
-CXXFLAGS += --std=c++11
+CXXFLAGS += --std=c++17
 
 test:
 	$(MAKE) -C i8hex_test

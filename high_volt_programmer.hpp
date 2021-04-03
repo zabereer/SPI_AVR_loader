@@ -9,15 +9,15 @@ namespace high_volt_programmer
 	// yet when calling this function.
 	// Set inverted_high_voltage_level_shifter to true if pin 8 is
 	// connected to base of NPN transistor used in inverted level shifter.
-	void read_fuses(const bool inverted_high_voltage_level_shifter,
-			spi_programmer::fuses_t&);
 
-	// Will prompt via serial interface, 12V source must not be connected
-	// yet when calling this function.
-	// Set inverted_high_voltage_level_shifter to true if pin 8 is
-	// connected to base of NPN transistor used in inverted level shifter.
+	void read_fuses(const bool inverted_high_voltage_level_shifter,
+			spi_programmer::fuses_t&,
+			const uint8_t crude_delay);
 	void write_fuses(const bool inverted_high_voltage_level_shifter,
-			 const spi_programmer::fuses_t&);
+			 const spi_programmer::fuses_t&,
+			 const uint8_t crude_delay);
+	void chip_erase(const bool inverted_high_voltage_level_shifter,
+			const uint8_t crude_delay);
 }
 
 #endif

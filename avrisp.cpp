@@ -497,6 +497,7 @@ void high_voltage_fuses_reset()
 {
 	spipgm::fuses_t fuses{};
 	bool inverted_high_voltage_level_shifter = true;
+	uint8_t crude_delay = 0x10;
 	bool done = false;
 	while (!done)
 	{
@@ -521,14 +522,18 @@ void high_voltage_fuses_reset()
 		Serial.println(F("l - modify low fuse for next write"));
 		Serial.println(F("h - modify high fuse for next write"));
 		Serial.println(F("x - modify ext fuse for next write"));
+		Serial.print(F("d - crude delay loop iterations - set to 0x"));
+		Serial.println(crude_delay, HEX);
 		Serial.println(F("r - read fuses "
-				 "(will prompt to connect power source)"));
+				 "(will prompt to connect 12V)"));
 		Serial.println(F("w - write fuses "
-				 "(will prompt to connect power source)"));
+				 "(will prompt to connect 12V)"));
+		Serial.println(F("e - chip erase "
+				 "(will prompt to connect 12V)"));
 		Serial.println(F("q - quite high voltage fuses reset menu"));
 		Serial.println();
 		Serial.println(F("  ! DO NOT connect 12V source yet !"));
-		char c = util::serial_read_char_of("iklhxrwq");
+		char c = util::serial_read_char_of("iklhxdrweq");
 		Serial.println();
 
 		switch (c)
@@ -555,18 +560,28 @@ void high_voltage_fuses_reset()
 		case 'x' :
 			Serial.print("current ext = 0x");
 			Serial.println(fuses.ext, HEX);
-			fuses.ext =util::serial_read_hex_byte();
+			fuses.ext = util::serial_read_hex_byte();
+			break;
+		case 'd' :
+			crude_delay = util::serial_read_hex_byte();
 			break;
 		case 'r' :
 			hvspgm::read_fuses(
-				inverted_high_voltage_level_shifter, fuses);
+				inverted_high_voltage_level_shifter,
+				fuses,
+				crude_delay);
 			break;
 		case 'w' :
-		{
 			hvspgm::write_fuses(
-				inverted_high_voltage_level_shifter, fuses);
+				inverted_high_voltage_level_shifter,
+				fuses,
+				crude_delay);
 			break;
-		}
+		case 'e' :
+			hvspgm::chip_erase(
+				inverted_high_voltage_level_shifter,
+				crude_delay);
+			break;
 		case 'q' :
 			done = true;
 			break;
